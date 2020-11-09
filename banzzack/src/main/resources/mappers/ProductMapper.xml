@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ProductMapper">
+	<!-- id는 마음대로 작성 prarameter는 실제DTO클래스 -->
+
+	<!-- 제품 등록 -->
+	<insert id="Register" parameterType="ProductDTO">
+		INSERT INTO
+		PRODUCT_TABLE(PRODUCT_NUM, PRODUCT_TITLE, PRODUCT_CONTENTS,
+		PRODUCT_IMG1, PRODUCT_IMG2, PRODUCT_IMG3, PRODUCT_RPICE,
+		PRODUCT_COUNT, PRODUCT_CATEGORY1, PRODUCT_CATEGORY2)
+		VALUES(PRODUCTAUTOINC.nextval, #{PRODUCT_TITLE}, #{PRODUCT_CONTENTS},
+		#{PRODUCT_IMG1},
+		#{PRODUCT_IMG2}, #{PRODUCT_IMG3}, #{PRODUCT_RPICE},
+		#{PRODUCT_COUNT}, #{PRODUCT_CATEGORY1}, #{PRODUCT_CATEGORY2})
+	</insert>
+
+	<!-- 리뷰 등록 -->
+	<insert id="review" parameterType="ReviewDTO">
+		INSERT INTO
+		REVIEW_TABLE(REVIEW_NUM, ORDERS_NUM, REVIEW_TITLE, REVIEW_CONTENTS,
+		USER_ID, PRODUCT_NUM, REVIEW_IMG)
+		VALUES(REVIEWAUTOINC.nextval,
+		#{ORDERS_NUM}, #{REVIEW_TITLE}, #{REVIEW_CONTENTS},
+		#{USER_ID},
+		#{PRODUCT_NUM}, #{REVIEW_IMG})
+	</insert>
+
+	<update id="changeReview" parameterType="ReviewDTO">
+		UPDATE ORDERS_TABLE
+		SET
+		IS_REVIEW = 1
+		WHERE ORDERS_NUM = #{ORDERS_NUM}
+	</update>
+	<!-- 가상이미지 등록 -->
+	<insert id="VirtualRegister" parameterType="VirtualDTO">
+		INSERT INTO
+		VIRTUAL_TABLE(PRODUCT_NUM, VIRTUAL_IMG, VIRTUAL_IMG2)
+		VALUES(VIRTUALCTAUTOINC.nextval, #{VIRTUAL_IMG}, #{VIRTUAL_IMG2})
+	</insert>
+
+	<!-- 제품 리스트 전체 조회 -->
+	<select id="mainListAll" parameterType="ProductDTO"
+		resultType="ProductDTO">
+		SELECT
+		PRODUCT_NUM,
+		PRODUCT_TITLE,
+		PRODUCT_IMG1,
+		PRODUCT_RPICE
+		FROM PRODUCT_TABLE
+		ORDER BY PRODUCT_NUM DESC
+	</select>
+
+	<!-- 제품 리스트 전체 조회 -->
+	<select id="productListAll" parameterType="ProductDTO"
+		resultType="ProductDTO">
+		SELECT
+		PRODUCT_NUM,
+		PRODUCT_TITLE,
+		PRODUCT_IMG1,
+		PRODUCT_RPICE
+		FROM PRODUCT_TABLE
+		WHERE PRODUCT_CATEGORY1 = #{PRODUCT_CATEGORY1}
+	</select>
+	<!-- 제품 리스트 전체 조회 -->
+	<select id="productListSelect" parameterType="ProductDTO"
+		resultType="ProductDTO">
+		SELECT
+		PRODUCT_NUM,
+		PRODUCT_TITLE,
+		PRODUCT_IMG1,
+		PRODUCT_RPICE
+		FROM PRODUCT_TABLE
+		WHERE PRODUCT_CATEGORY1 = #{PRODUCT_CATEGORY1}
+		AND
+		PRODUCT_CATEGORY2 = #{PRODUCT_CATEGORY2}
+	</select>
+	<!-- 제품 정보 조회 -->
+	<select id="ProductSearch" parameterType="ProductDTO"
+		resultType="ProductDTO">
+		SELECT
+		PRODUCT_NUM,
+		PRODUCT_TITLE,
+		PRODUCT_CONTENTS,
+		PRODUCT_IMG1,
+		PRODUCT_IMG2,
+		PRODUCT_IMG3,
+		PRODUCT_RPICE,
+		PRODUCT_COUNT,
+		PRODUCT_CATEGORY1,
+		PRODUCT_CATEGORY2
+		FROM PRODUCT_TABLE
+		WHERE PRODUCT_NUM
+		= #{PRODUCT_NUM}
+	</select>
+
+	<!-- 베스트 셀러 -->
+	<select id="bestListAll" resultType="ProductDTO">
+		SELECT SUM(o.orders_amount)
+		구매수량,
+		p.PRODUCT_NUM,
+		PRODUCT_TITLE,
+		PRODUCT_IMG1,
+		PRODUCT_RPICE
+		FROM
+		ORDERS_TABLE o,
+		product_table p
+		where o.product_num = p.product_num
+		group by
+		p.PRODUCT_NUM,PRODUCT_TITLE,PRODUCT_IMG1,PRODUCT_RPICE
+		ORDER BY
+		SUM(o.orders_amount) DESC
+	</select>
+	<!-- 상품별 뷰 리스트 -->
+	<select id="productReviewList" resultType="ReviewDTO">
+		SELECT REVIEW_NUM, review_img, ORDERS_NUM,
+		review_title, review_contents, review_time
+		FROM REVIEW_TABLE 
+		WHERE PRODUCT_NUM = #{PRODUCT_NUM}
+		ORDER BY review_time DESC
+	</select>
+	<!-- 내 리뷰 리스트 -->
+	<select id="myReviewListAll" resultType="ReviewDTO">
+		SELECT REVIEW_NUM, review_img, ORDERS_NUM,
+		review_title, review_contents, review_time
+		FROM REVIEW_TABLE 
+		WHERE USER_ID = #{USER_ID}
+		ORDER BY review_time DESC
+	</select>
+	
+	<!-- 리뷰 리스트 -->
+	<select id="reviewListAll" resultType="ReviewDTO">
+		SELECT REVIEW_NUM, review_img, ORDERS_NUM,
+		review_title, review_contents, review_time
+		FROM REVIEW_TABLE 
+		ORDER BY review_time DESC
+	</select>
+	
+	<!-- 리뷰 삭제 -->
+	<delete id="deletReivew" parameterType="ReviewDTO">
+		DELETE FROM REVIEW_TABLE
+		WHERE REVIEW_NUM = #{REVIEW_NUM}
+	</delete>
+	 <!-- 삭제후 처리 -->
+	<update id="UpdateisReivew" parameterType="ReviewDTO">
+		UPDATE ORDERS_TABLE
+    	SET IS_REVIEW = 0 
+    	WHERE ORDERS_NUM = #{ORDERS_NUM}
+	</update>
+
+	
+	<!-- 해당 카테고리 베스트 셀러 -->
+	<select id="bestSellerproduct" parameterType="ProductDTO"
+		resultType="ProductDTO">
+		SELECT SUM(o.orders_amount) 구매수량,
+		p.PRODUCT_NUM,
+		PRODUCT_TITLE,
+		PRODUCT_IMG1,
+		PRODUCT_RPICE
+		FROM ORDERS_TABLE o,
+		product_table p
+		where o.product_num = p.product_num AND
+		PRODUCT_CATEGORY1 = #{PRODUCT_CATEGORY1}
+		group by
+		p.PRODUCT_NUM,PRODUCT_TITLE,PRODUCT_IMG1,PRODUCT_RPICE
+		ORDER BY
+		SUM(o.orders_amount) DESC
+	</select>
+
+	<!-- 구매내역 리스트 -->
+	<select id="myOrdersListAll" parameterType="MyOrderDTO"
+		resultType="MyOrderDTO">
+		SELECT o.ORDERS_NUM, p.product_num, p.product_img1,
+		p.product_title, p.PRODUCT_RPICE, o.ORDERS_AMOUNT, o.orders_time,
+		o.is_review
+		FROM PRODUCT_TABLE p, ORDERS_TABLE o
+		WHERE p.product_num =
+		o.product_num AND o.user_id = #{USER_ID}
+		ORDER BY o.orders_time
+	</select>
+
+	<!-- 가상 착용 정보 조회 -->
+	<select id="VirtualSearch" parameterType="VirtualDTO"
+		resultType="VirtualDTO">
+		SELECT
+		PRODUCT_NUM,
+		VIRTUAL_IMG,
+		VIRTUAL_IMG2
+		FROM
+		VIRTUAL_TABLE
+		WHERE PRODUCT_NUM = #{PRODUCT_NUM}
+	</select>
+
+
+	<!-- 제품 구매 -->
+	<insert id="orderProduct" parameterType="OrderDTO">
+		INSERT INTO
+		ORDERS_TABLE(ORDERS_NUM, ORDERS_AMOUNT, USER_ID, PRODUCT_NUM)
+		VALUES(ORDERAUTOINC.nextval, #{ORDERS_AMOUNT}, #{USER_ID},
+		#{PRODUCT_NUM})
+	</insert>
+</mapper>

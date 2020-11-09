@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="UserMapper">
+	<!-- id는 마음대로 작성 prarameter는 실제DTO클래스 -->
+
+	<!-- 유저 회원가입 -->
+	<insert id="Signup" parameterType="UserDTO">
+		INSERT INTO USER_TABLE(USER_ID, USER_PW, USER_NAME, USER_EMAIL, USER_PHONE, USER_ADDRESS1, USER_ADDRESS2, USER_ADDRESS3, USER_GRANT)
+		VALUES(#{USER_ID}, #{USER_PW}, #{USER_NAME}, #{USER_EMAIL},
+		#{USER_PHONE}, #{USER_ADDRESS1}, #{USER_ADDRESS2}, #{USER_ADDRESS3}, 0)
+	</insert>
+	
+	<!-- 로그인 처리 -->
+	<select id="loginCheck" parameterType="UserDTO"
+		resultType="String">
+		SELECT USER_NAME 
+		FROM USER_TABLE 
+		WHERE USER_ID = #{USER_ID} AND USER_PW = #{USER_PW}
+	</select>
+
+	<!-- 회원 정보 조회 -->
+	<select id="viewUser" parameterType="UserDTO"
+		resultType="UserDTO">
+		SELECT
+		USER_ID,
+		USER_PW,
+		USER_NAME,
+		USER_EMAIL,
+		USER_PHONE,
+		USER_ADDRESS1,
+		USER_ADDRESS2,
+		USER_ADDRESS3,
+		USER_GRANT
+		FROM USER_TABLE
+		WHERE USER_ID = #{USER_ID} AND USER_PW = #{USER_PW}
+	</select>
+	
+	<select id="Test" resultType="UserDTO">
+		select * from USER_TABLE
+	</select>
+</mapper>
